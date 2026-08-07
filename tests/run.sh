@@ -67,6 +67,9 @@ assert_exit "clean ruleset exits zero" 0 -- $IA "$T/good.v4" --no-color
 echo "== empty / no filter table =="
 printf '*nat\n:PREROUTING ACCEPT [0:0]\nCOMMIT\n' > "$T/nofilter.v4"
 assert "no filter table flagged"     "no host firewall rules at all"     -- $IA "$T/nofilter.v4" --no-color
+printf '*filter\n:OUTPUT ACCEPT [0:0]\nCOMMIT\n' > "$T/missingchains.v4"
+assert "missing input chain fails closed" "no INPUT base chain declaration" -- $IA "$T/missingchains.v4" --no-color
+assert_exit "missing base chains exit non-zero" 1 -- $IA "$T/missingchains.v4" --no-color
 
 echo "== stdin + multiport =="
 _out="$(printf '*filter\n:INPUT DROP [0:0]\n-A INPUT -p tcp -m multiport --dports 3306,6379 -j ACCEPT\nCOMMIT\n' | $IA - --no-color)"
