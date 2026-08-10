@@ -80,7 +80,9 @@ def audit(text: str) -> list[Finding]:
     # default policies
     for chain in ("INPUT", "FORWARD"):
         pol = policies.get(("filter", chain))
-        if pol == "ACCEPT":
+        if pol is None:
+            out.append(Finding("HIGH", f"filter table has no {chain} base chain declaration; audit is incomplete"))
+        elif pol == "ACCEPT":
             lvl = "HIGH" if chain == "INPUT" else "MEDIUM"
             out.append(Finding(lvl, f"{chain} chain default policy is ACCEPT; it should be DROP with explicit allows"))
 
