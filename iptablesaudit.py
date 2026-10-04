@@ -86,6 +86,11 @@ def audit(text: str) -> list[Finding]:
             lvl = "HIGH" if chain == "INPUT" else "MEDIUM"
             out.append(Finding(lvl, f"{chain} chain default policy is ACCEPT; it should be DROP with explicit allows"))
 
+    # OUTPUT policy ACCEPT is normal for clients, only note exotic values
+    outpol = policies.get(("filter", "OUTPUT"))
+    if outpol is not None and outpol not in ("ACCEPT", "DROP"):
+        out.append(Finding("LOW", f"OUTPUT chain policy is unusual: {outpol}"))
+
     # per-rule INPUT analysis
     for tokens in input_rules:
         target = _opt(tokens, "-j")
